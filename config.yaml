@@ -1,0 +1,54 @@
+version: 1.0
+
+environments:
+  production:
+    database:
+      host: prod-db.example.com
+      port: 5432
+      name: prod_database
+      user: prod_user
+      password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        35333330336165303136336333623362636139346233303338656635336436623362656266383438
+      options:
+        pool_size: 20
+        timeout: 5000
+    logging:
+      level: INFO
+      file: /var/log/app/prod.log
+      rotation: "daily"
+    cache:
+      enabled: true
+      redis_host: prod-redis.example.com
+      redis_port: 6379
+      redis_password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        30376164336334646539303331383565306136613835336637353032306362613739656633373836
+
+  development:
+    database:
+      host: localhost
+      port: 5432
+      name: dev_database
+      user: dev_user
+      password: dev_password
+      options:
+        pool_size: 5
+        timeout: 3000
+    logging:
+      level: DEBUG
+      file: logs/dev.log
+      rotation: "size:10MB"
+    cache:
+      enabled: false
+      redis_host: localhost
+      redis_port: 6379
+      redis_password: dev_redis_password
+
+features:
+  experimental:
+    feature_one: true
+    feature_two: false
+  stable:
+    feature_three: true
+    feature_four: true
