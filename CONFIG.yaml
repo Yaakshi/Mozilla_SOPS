@@ -1,0 +1,27 @@
+# .sops.yaml - Configuration file for SOPS
+sops:
+  # The KMS, GCP KMS, and PGP keys will be used to encrypt/decrypt data.
+  kms:
+    - arn: arn:aws:kms:us-east-1:123456789012:key/abcd-1234-efgh-5678-ijkl  # Example AWS KMS ARN
+      role: arn:aws:iam::123456789012:role/SOPSDecryptRole  # Optional IAM role to assume
+
+  gcp_kms:
+    - resource_id: projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key
+      service_account: sops-decrypt@my-project.iam.gserviceaccount.com  # Optional service account
+
+  pgp:
+    - fingerprint: 1234ABCD5678EFGH1234ABCD5678EFGH1234ABCD  # Example PGP fingerprint
+
+  azure_keyvault:
+    - name: my-keyvault  # Azure Key Vault instance
+      key: my-encryption-key  # Key stored in Azure Key Vault
+
+  # Custom settings for file encryption
+  encrypted_regex: '^(data|stringData|secrets)$'  # Encrypt these fields (for Kubernetes secrets)
+  unencrypted_suffix: _unencrypted  # Fields with this suffix remain in plain text
+
+  # Specify how to handle versioning and editing
+  creation_rules:
+    - path_regex: '.*\.yaml$'  # Apply SOPS encryption only to .yaml files
+      kms: true                # Use AWS KMS for these files
+      pgp: false               # Disable PGP for these files
