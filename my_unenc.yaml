@@ -1,0 +1,98 @@
+# Sample Complex YAML Configuration for a Web Application
+version: "1.0"
+
+application:
+  name: "MyApp"
+  environment: "production"
+  features:
+    logging: true
+    cache: false
+  retry_policy:
+    max_retries: 5
+    backoff_strategy: "exponential"
+    initial_delay_ms: 1000
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  tls:
+    enabled: true
+    cert_file: "/etc/ssl/certs/server.crt"
+    key_file: "/etc/ssl/private/server.key"
+
+database:
+  type: "postgresql"
+  host: "db.myapp.com"
+  port: 5432
+  username: "${DB_USER}"   # Using environment variable for sensitive info
+  password: "${DB_PASS}"   # Using environment variable for sensitive info
+  name: "myapp_db"
+  connection_pool:
+    max_connections: 20
+    min_connections: 5
+    idle_timeout_ms: 30000
+
+security:
+  jwt:
+    secret: "${JWT_SECRET}"
+    expiration_time_minutes: 60
+  oauth:
+    enabled: true
+    providers:
+      google:
+        client_id: "google-client-id"
+        client_secret: "google-client-secret"
+        redirect_uri: "https://myapp.com/auth/callback/google"
+      github:
+        client_id: "github-client-id"
+        client_secret: "github-client-secret"
+        redirect_uri: "https://myapp.com/auth/callback/github"
+
+notifications:
+  email:
+    smtp_server: "smtp.mail.com"
+    smtp_port: 587
+    from: "no-reply@myapp.com"
+    enable_tls: true
+    retry_on_failure: true
+    max_attempts: 3
+  webhook:
+    url: "https://webhook.myapp.com/events"
+    secret_token: "${WEBHOOK_SECRET_TOKEN}"
+
+# Kubernetes Deployment Example
+kubernetes:
+  replicas: 3
+  image:
+    repository: "myapp"
+    tag: "v1.0.0"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "512Mi"
+  liveness_probe:
+    http_get:
+      path: "/health"
+      port: 8080
+    initial_delay_seconds: 10
+    timeout_seconds: 5
+  readiness_probe:
+    http_get:
+      path: "/ready"
+      port: 8080
+    initial_delay_seconds: 5
+    timeout_seconds: 3
+
+monitoring:
+  enabled: true
+  services:
+    - name: "Prometheus"
+      url: "http://prometheus:9090"
+    - name: "Grafana"
+      url: "http://grafana:3000"
+  alerts:
+    critical_threshold: 90
+    warning_threshold: 70
